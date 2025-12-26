@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import path from 'path';
 import { InstagramDMService } from './services/instagram-dm.service';
 import { SessionManager } from './services/session-manager.service';
 
@@ -13,10 +14,15 @@ const PORT = process.env.PORT || 3000;
 const API_KEY = process.env.API_KEY || '';
 
 // Middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false, // Disable CSP to allow inline scripts in our web app
+}));
 app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
+
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, '../public')));
 
 // Initialize services
 const sessionManager = new SessionManager();
@@ -276,7 +282,11 @@ app.use((err: Error, req: Request, res: Response, next: Function) => {
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Instagram DM Automation Server running on port ${PORT}`);
-  console.log(`📝 API Documentation:`);
+  console.log(``);
+  console.log(`🌐 Web Interface: http://localhost:${PORT}`);
+  console.log(`   Open this URL in your browser to access the web app!`);
+  console.log(``);
+  console.log(`📝 API Endpoints:`);
   console.log(`   - POST /api/send-dm - Send single DM`);
   console.log(`   - POST /api/send-bulk-dm - Send bulk DMs`);
   console.log(`   - GET /api/session/:sessionId - Get session info`);

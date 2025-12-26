@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram DM Automation | AI Lead Gen</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
+                <h1>Instagram DM Automation</h1>
+            </div>
+            <div class="header-status">
+                <span class="status-indicator" id="serverStatus">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Checking...</span>
+                </span>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tabs">
+            <button class="tab active" data-tab="single">Single DM</button>
+            <button class="tab" data-tab="bulk">Bulk DMs</button>
+            <button class="tab" data-tab="sessions">Sessions</button>
+            <button class="tab" data-tab="settings">Settings</button>
+        </nav>
+
+        <!-- Single DM Tab -->
+        <div class="tab-content active" id="single-tab">
+            <div class="card">
+                <h2>Send Single DM</h2>
+                <p class="card-description">Send a personalized Instagram DM to one recipient</p>
+
+                <form id="singleDmForm" class="form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="singleUsername">Your Instagram Username</label>
+                            <input type="text" id="singleUsername" placeholder="your_username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="singlePassword">Your Instagram Password</label>
+                            <input type="password" id="singlePassword" placeholder="••••••••" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="recipient">Recipient Username</label>
+                        <input type="text" id="recipient" placeholder="target_username" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" rows="4" placeholder="Hey! I noticed you're interested in..." required></textarea>
+                        <div class="char-counter">
+                            <span id="charCount">0</span> / 1000 characters
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="singleSessionId">Session ID (Optional - for faster sending)</label>
+                        <input type="text" id="singleSessionId" placeholder="Leave empty for first send">
+                        <small>Reuse session ID from previous sends to avoid re-login</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="sendSingleBtn">
+                        <span class="btn-text">Send DM</span>
+                        <span class="btn-loader" style="display: none;"></span>
+                    </button>
+                </form>
+
+                <div id="singleResult" class="result" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Bulk DM Tab -->
+        <div class="tab-content" id="bulk-tab">
+            <div class="card">
+                <h2>Send Bulk DMs</h2>
+                <p class="card-description">Send personalized DMs to multiple recipients</p>
+
+                <form id="bulkDmForm" class="form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bulkUsername">Your Instagram Username</label>
+                            <input type="text" id="bulkUsername" placeholder="your_username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bulkPassword">Your Instagram Password</label>
+                            <input type="password" id="bulkPassword" placeholder="••••••••" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="delayMs">Delay Between Messages (ms)</label>
+                        <input type="number" id="delayMs" value="5000" min="3000" max="30000" required>
+                        <small>Recommended: 5000-10000ms to avoid rate limits</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bulkSessionId">Session ID (Optional)</label>
+                        <input type="text" id="bulkSessionId" placeholder="Leave empty for first send">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bulkData">Recipients & Messages (JSON or CSV)</label>
+                        <div class="format-selector">
+                            <button type="button" class="format-btn active" data-format="json">JSON</button>
+                            <button type="button" class="format-btn" data-format="csv">CSV</button>
+                        </div>
+                        <textarea id="bulkData" rows="10" placeholder='[
+  {"username": "user1", "message": "Personalized message 1"},
+  {"username": "user2", "message": "Personalized message 2"}
+]' required></textarea>
+                        <small id="formatHelp">Format: JSON array with username and message fields</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="sendBulkBtn">
+                        <span class="btn-text">Send Bulk DMs</span>
+                        <span class="btn-loader" style="display: none;"></span>
+                    </button>
+                </form>
+
+                <div id="bulkResult" class="result" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Sessions Tab -->
+        <div class="tab-content" id="sessions-tab">
+            <div class="card">
+                <h2>Active Sessions</h2>
+                <p class="card-description">Manage your Instagram authentication sessions</p>
+
+                <button class="btn btn-secondary" id="refreshSessions">
+                    <span>🔄 Refresh Sessions</span>
+                </button>
+
+                <div id="sessionsList" class="sessions-list">
+                    <p class="text-muted">Loading sessions...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div class="tab-content" id="settings-tab">
+            <div class="card">
+                <h2>Settings</h2>
+                <p class="card-description">Configure your API connection</p>
+
+                <form id="settingsForm" class="form">
+                    <div class="form-group">
+                        <label for="apiUrl">API Server URL</label>
+                        <input type="text" id="apiUrl" placeholder="http://localhost:3000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="apiKey">API Key (Optional)</label>
+                        <input type="password" id="apiKey" placeholder="Leave empty if not required">
+                        <small>Set this if your server requires API authentication</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                </form>
+
+                <div class="info-section">
+                    <h3>Quick Tips</h3>
+                    <ul>
+                        <li>Store your Instagram credentials securely</li>
+                        <li>Start with 10-20 DMs per day for new accounts</li>
+                        <li>Use 5-10 second delays between messages</li>
+                        <li>Personalize messages with AI for better results</li>
+                        <li>Save session IDs for faster subsequent sends</li>
+                    </ul>
+                </div>
+
+                <div class="info-section">
+                    <h3>API Documentation</h3>
+                    <p>For n8n integration and advanced usage, check the <a href="https://github.com/otto-dotcom/instagram-private-api" target="_blank">API documentation</a>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/app.js"></script>
+</body>
+</html>

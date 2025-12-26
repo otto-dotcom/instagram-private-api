@@ -1,10 +1,21 @@
 # Instagram DM Automation for n8n
 
-Automate Instagram Direct Messages (DMs) with n8n workflow automation. This server integrates with your existing AI lead gen workflow to send personalized Instagram DMs alongside SMS and email outreach.
+Automate Instagram Direct Messages (DMs) with n8n workflow automation. This service includes both a **beautiful web interface** and a **REST API** for programmatic access. Integrates seamlessly with your existing AI lead gen workflow to send personalized Instagram DMs alongside SMS and email outreach.
 
 ## 🎯 Overview
 
-This service provides a REST API that enables n8n to send Instagram DMs programmatically. Perfect for:
+This service provides **two ways** to send Instagram DMs:
+
+### 🌐 Web Interface (NEW!)
+A gorgeous, user-friendly web app for managing DM campaigns:
+- Send single or bulk DMs with a click
+- Real-time session management
+- CSV/JSON data import
+- Success/failure tracking
+- No coding required!
+
+### 🔌 REST API
+Full-featured API for n8n and programmatic access. Perfect for:
 - AI-powered personalized outreach campaigns
 - Lead generation workflows
 - Multi-channel marketing automation (SMS + Email + Instagram DMs)
@@ -73,7 +84,29 @@ npm run dev
 
 The server will start on `http://localhost:3000` (or your configured PORT).
 
+## 🌐 Using the Web Interface
+
+**Open your browser and go to:** `http://localhost:3000`
+
+You'll see a beautiful web app with:
+- **Single DM Tab** - Send DMs to one recipient at a time
+- **Bulk DMs Tab** - Send to multiple recipients (supports JSON/CSV)
+- **Sessions Tab** - Manage your Instagram sessions
+- **Settings Tab** - Configure API connection and view tips
+
+**Quick Example:**
+1. Open `http://localhost:3000` in your browser
+2. Click **Single DM** tab
+3. Enter your Instagram credentials
+4. Add recipient username and message
+5. Click **Send DM**
+6. Done! Session ID is saved for faster future sends
+
+For detailed instructions, see [WEB_APP_GUIDE.md](./WEB_APP_GUIDE.md)
+
 ## 📡 API Endpoints
+
+For n8n and programmatic access:
 
 ### Health Check
 ```
