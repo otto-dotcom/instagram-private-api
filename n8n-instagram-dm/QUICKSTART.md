@@ -2,6 +2,47 @@
 
 Get up and running in 5 minutes!
 
+**Choose your interface:**
+- 🌐 **[Web Interface](#web-interface)** - No coding, just click and send!
+- 🔌 **[API/n8n Integration](#apin8n-integration)** - For automation workflows
+
+---
+
+## 🌐 Web Interface
+
+Perfect for manual DM campaigns and testing.
+
+### Step 1: Install & Start
+
+```bash
+cd n8n-instagram-dm
+npm install
+npm run build
+npm start
+```
+
+### Step 2: Open Browser
+
+Go to: **http://localhost:3000**
+
+### Step 3: Send Your First DM
+
+1. Click **Single DM** tab
+2. Enter your Instagram username & password
+3. Add recipient username
+4. Write your message
+5. Click **Send DM**
+
+**Done! 🎉**
+
+For detailed web app guide, see [WEB_APP_GUIDE.md](./WEB_APP_GUIDE.md) or [START_HERE.md](./START_HERE.md)
+
+---
+
+## 🔌 API/n8n Integration
+
+For programmatic access and workflow automation.
+
 ## Step 1: Install Dependencies
 
 ```bash
