@@ -1,0 +1,248 @@
+{
+  "name": "Instagram DM - AI Lead Gen Campaign",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "name": "Schedule Daily 9AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "YOUR_TABLE_ID",
+        "returnAll": false,
+        "limit": 50,
+        "options": {
+          "filterByFormula": "AND({Status} = 'Qualified', {Instagram_Contacted} = FALSE())"
+        }
+      },
+      "name": "Get Leads from Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "credentials": {
+        "airtableApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Prepare data for AI message generation\nconst leads = [];\n\nfor (const item of items) {\n  leads.push({\n    json: {\n      name: item.json.Name,\n      company: item.json.Company,\n      instagram: item.json.Instagram_Username,\n      interest: item.json.Interest_Area,\n      recordId: item.json.id\n    }\n  });\n}\n\nreturn leads;"
+      },
+      "name": "Transform Lead Data",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are an expert at writing personalized cold outreach messages for a B2B AI automation agency. Write compelling, value-focused messages under 280 characters."
+            },
+            {
+              "role": "user",
+              "content": "=Write a personalized Instagram DM for {{ $json.name }} from {{ $json.company }} who is interested in {{ $json.interest }}. Focus on how AI automation can solve their specific challenges. Be friendly but professional."
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.7,
+          "maxTokens": 150
+        }
+      },
+      "name": "Generate AI Message",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "2",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/send-dm",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "={{ $env.INSTAGRAM_DM_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "username",
+              "value": "={{ $env.INSTAGRAM_USERNAME }}"
+            },
+            {
+              "name": "password",
+              "value": "={{ $env.INSTAGRAM_PASSWORD }}"
+            },
+            {
+              "name": "recipient",
+              "value": "={{ $node['Transform Lead Data'].json.instagram }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $node['Generate AI Message'].json.choices[0].message.content }}"
+            },
+            {
+              "name": "sessionId",
+              "value": "={{ $workflow.sessionId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Send Instagram DM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "YOUR_TABLE_ID",
+        "id": "={{ $node['Transform Lead Data'].json.recordId }}",
+        "fields": {
+          "values": [
+            {
+              "fieldId": "Instagram_Contacted",
+              "fieldValue": "true"
+            },
+            {
+              "fieldId": "Last_Contact_Date",
+              "fieldValue": "={{ $now.toISODate() }}"
+            },
+            {
+              "fieldId": "DM_Thread_ID",
+              "fieldValue": "={{ $node['Send Instagram DM'].json.data.threadId }}"
+            },
+            {
+              "fieldId": "DM_Status",
+              "fieldValue": "={{ $node['Send Instagram DM'].json.success ? 'Sent' : 'Failed' }}"
+            }
+          ]
+        }
+      },
+      "name": "Update Airtable Status",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [1250, 300],
+      "credentials": {
+        "airtableApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Store session ID for reuse\nif ($node['Send Instagram DM'].json.data.sessionId) {\n  $workflow.sessionId = $node['Send Instagram DM'].json.data.sessionId;\n}\n\nreturn items;"
+      },
+      "name": "Save Session ID",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1450, 300]
+    }
+  ],
+  "connections": {
+    "Schedule Daily 9AM": {
+      "main": [
+        [
+          {
+            "node": "Get Leads from Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Leads from Airtable": {
+      "main": [
+        [
+          {
+            "node": "Transform Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform Lead Data": {
+      "main": [
+        [
+          {
+            "node": "Generate AI Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate AI Message": {
+      "main": [
+        [
+          {
+            "node": "Send Instagram DM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Instagram DM": {
+      "main": [
+        [
+          {
+            "node": "Update Airtable Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Airtable Status": {
+      "main": [
+        [
+          {
+            "node": "Save Session ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "tags": [],
+  "pinData": {},
+  "versionId": "1"
+}
